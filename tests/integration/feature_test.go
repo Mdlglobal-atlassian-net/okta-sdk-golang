@@ -29,7 +29,7 @@ import (
 func Test_can_list_all_features_for_organization(t *testing.T) {
 	client, _ := tests.NewClient()
 
-	features, response, err := client.Feature.ListAllFeatures()
+	features, response, err := client.Feature.ListFeatures()
 
 	require.NoError(t, err, "listing features must not error")
 	require.IsType(t, &okta.Response{}, response, "did not return `*okta.Response` type as second variable")
@@ -51,7 +51,7 @@ func Test_can_list_all_features_for_organization(t *testing.T) {
 func Test_can_get_a_feature(t *testing.T) {
 	client, _ := tests.NewClient()
 
-	features, _, err := client.Feature.ListAllFeatures()
+	features, _, err := client.Feature.ListFeatures()
 	require.NoError(t, err, "listing features must not error")
 
 	firstFeatureId := features[0].Id
@@ -77,7 +77,7 @@ func Test_can_get_a_feature(t *testing.T) {
 func Test_can_get_feature_dependencies(t *testing.T) {
 	client, _ := tests.NewClient()
 
-	features, _, err := client.Feature.ListAllFeatures()
+	features, _, err := client.Feature.ListFeatures()
 	require.NoError(t, err, "listing features must not error")
 
 	firstFeatureId := features[0].Id
@@ -94,7 +94,7 @@ func Test_can_get_feature_dependencies(t *testing.T) {
 func Test_can_get_feature_dependants(t *testing.T) {
 	client, _ := tests.NewClient()
 
-	features, _, err := client.Feature.ListAllFeatures()
+	features, _, err := client.Feature.ListFeatures()
 	require.NoError(t, err, "listing features must not error")
 
 	firstFeatureId := features[0].Id
@@ -111,7 +111,7 @@ func Test_can_get_feature_dependants(t *testing.T) {
 func Test_can_update_a_feature_lifecycle(t *testing.T) {
 	client, _ := tests.NewClient()
 
-	features, _, err := client.Feature.ListAllFeatures()
+	features, _, err := client.Feature.ListFeatures()
 	require.NoError(t, err, "listing features must not error")
 
 	firstFeatureId := features[0].Id

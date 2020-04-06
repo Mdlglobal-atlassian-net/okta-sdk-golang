@@ -46,7 +46,7 @@ func Test_exercise_factor_lifecycle(t *testing.T) {
 	profile["lastName"] = "Factor-Lifecycle"
 	profile["email"] = "john-factor-lifecycle@example.com"
 	profile["login"] = "john-factor-lifecycle@example.com"
-	u := &okta.User{
+	u := &okta.CreateUserRequest{
 		Credentials: uc,
 		Profile:     &profile,
 	}
@@ -58,7 +58,7 @@ func Test_exercise_factor_lifecycle(t *testing.T) {
 	allowedFactors, _, _ := client.Factor.ListSupportedFactors(user.Id)
 	continueTesting := false
 	for _, f := range allowedFactors {
-		if f.(map[string]interface{})["factorType"] == "sms" {
+		if f.(*okta.Factor).FactorType == "sms" {
 			continueTesting = true
 		}
 	}
@@ -69,21 +69,21 @@ func Test_exercise_factor_lifecycle(t *testing.T) {
 
 		assert.Empty(t, factors, "Factors list should be empty")
 
-		factorProfile := okta.NewSmsFactorProfile()
+		factorProfile := okta.NewSmsUserFactorProfile()
 		factorProfile.PhoneNumber = "16284001133"
 
-		factor := okta.NewSmsFactor()
+		factor := okta.NewSmsUserFactor()
 		factor.Profile = factorProfile
 
-		addedFactor, resp, err := client.Factor.AddFactor(user.Id, factor, nil)
+		addedFactor, resp, err := client.Factor.EnrollFactor(user.Id, factor, nil)
 		require.NotEmpty(t, resp, "Response should not be empty")
 		require.NoError(t, err, "Adding factor should not error")
-		assert.IsType(t, okta.NewSmsFactor(), addedFactor)
+		assert.IsType(t, okta.NewSmsUserFactor(), addedFactor)
 
-		foundFactor, _, err := client.Factor.GetFactor(user.Id, addedFactor.(*okta.SmsFactor).Id, okta.NewSmsFactor())
+		foundFactor, _, err := client.Factor.GetFactor(user.Id, addedFactor.(*okta.SmsUserFactor).Id, okta.NewSmsUserFactor())
 		require.NoError(t, err, "Getting the factor should not error")
 
-		client.Factor.DeleteFactor(user.Id, foundFactor.(*okta.SmsFactor).Id)
+		client.Factor.DeleteFactor(user.Id, foundFactor.(*okta.SmsUserFactor).Id)
 	} else {
 		t.Skip("Skipping exercise factor lifecycle testing. SMS factor was not enabled")
 	}

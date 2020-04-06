@@ -10,6 +10,7 @@ require (
 	github.com/lestrrat-go/jwx v0.9.0
 	github.com/patrickmn/go-cache v0.0.0-20180815053127-5633e0862627
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/spacemonkeygo/openssl v0.0.0-20181017203307-c2dcc5cca94a
 	github.com/square/go-jose v2.4.1+incompatible
 	github.com/square/go-jose/v3 v3.0.0-20200225220504-708a9fe87ddc
 	github.com/stretchr/testify v1.5.1

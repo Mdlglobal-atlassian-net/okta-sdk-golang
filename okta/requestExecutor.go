@@ -35,15 +35,18 @@ import (
 	"time"
 
 	"github.com/okta/okta-sdk-golang/okta/cache"
-	"github.com/square/go-jose/jwt"
 	"gopkg.in/square/go-jose.v2"
+	"gopkg.in/square/go-jose.v2/jwt"
 )
 
 type RequestExecutor struct {
-	httpClient *http.Client
-	config     *config
-	BaseUrl    *url.URL
-	cache      cache.Cache
+	httpClient        *http.Client
+	config            *config
+	BaseUrl           *url.URL
+	cache             cache.Cache
+	binary            bool
+	headerAccept      string
+	headerContentType string
 }
 
 type ClientAssertionClaims struct {
@@ -67,6 +70,9 @@ func NewRequestExecutor(httpClient *http.Client, cache cache.Cache, config *conf
 	re.httpClient = httpClient
 	re.config = config
 	re.cache = cache
+	re.binary = false
+	re.headerAccept = "application/json"
+	re.headerContentType = "application/json"
 
 	if httpClient == nil {
 		tr := &http.Transport{
@@ -106,7 +112,7 @@ func (re *RequestExecutor) NewRequest(method string, url string, body interface{
 			token := re.cache.GetString("OKTA_ACCESS_TOKEN")
 			req.Header.Add("Authorization", "Bearer "+token)
 		} else {
-			priv := []byte(re.config.Okta.Client.PrivateKey)
+			priv := []byte(strings.ReplaceAll(re.config.Okta.Client.PrivateKey, `\n`, "\n"))
 
 			privPem, _ := pem.Decode(priv)
 			if privPem.Type != "RSA PRIVATE KEY" {
@@ -122,6 +128,7 @@ func (re *RequestExecutor) NewRequest(method string, url string, body interface{
 			if err != nil {
 				return nil, err
 			}
+			fmt.Printf("%+v\n", signer)
 
 			claims := ClientAssertionClaims{
 				Subject:  re.config.Okta.Client.ClientId,
@@ -135,6 +142,7 @@ func (re *RequestExecutor) NewRequest(method string, url string, body interface{
 			if err != nil {
 				return nil, err
 			}
+			fmt.Printf("%+v\n", clientAssertion)
 
 			var tokenRequestBuff io.ReadWriter
 			query := nUrl.Values{}
@@ -149,6 +157,7 @@ func (re *RequestExecutor) NewRequest(method string, url string, body interface{
 			if err != nil {
 				return nil, err
 			}
+			fmt.Printf("%+v\n", tokenRequestUrl)
 
 			tokenRequest.Header.Add("Accept", "application/json")
 			tokenRequest.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -165,7 +174,8 @@ func (re *RequestExecutor) NewRequest(method string, url string, body interface{
 			origResp := ioutil.NopCloser(bytes.NewBuffer(respBody))
 			tokenResponse.Body = origResp
 			var accessToken *RequestAccessToken
-			_, err = buildResponse(tokenResponse, &accessToken)
+			resp, err := buildResponse(tokenResponse, &accessToken)
+			fmt.Printf("%+v\n", resp)
 			if err != nil {
 				return nil, err
 			}
@@ -176,13 +186,33 @@ func (re *RequestExecutor) NewRequest(method string, url string, body interface{
 
 	}
 	req.Header.Add("User-Agent", NewUserAgent(re.config).String())
-	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Accept", re.headerAccept)
 
 	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Content-Type", re.headerContentType)
 	}
 
+	// Force reset defaults
+	re.binary = false
+	re.headerAccept = "application/json"
+	re.headerContentType = "application/json"
+
 	return req, nil
+}
+
+func (re *RequestExecutor) AsBinary() *RequestExecutor {
+	re.binary = true
+	return re
+}
+
+func (re *RequestExecutor) WithAccept(acceptHeader string) *RequestExecutor {
+	re.headerAccept = acceptHeader
+	return re
+}
+
+func (re *RequestExecutor) WithContentType(contentTypeHeader string) *RequestExecutor {
+	re.headerContentType = contentTypeHeader
+	return re
 }
 
 func (re *RequestExecutor) Do(req *http.Request, v interface{}) (*Response, error) {
@@ -345,9 +375,9 @@ func buildResponse(resp *http.Response, v interface{}) (*Response, error) {
 			decodeError = nil
 		}
 		if decodeError != nil {
-			err = decodeError
+			return nil, decodeError
 		}
 
 	}
-	return response, err
+	return response, nil
 }
