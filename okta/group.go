@@ -291,6 +291,7 @@ func (m *GroupResource) ListAssignedApplicationsForGroup(groupId string, qp *que
 		apps[i] = &application[i]
 	}
 	return apps, resp, nil
+
 }
 
 func (m *GroupResource) ListGroupAssignedRoles(groupId string, qp *query.Params) ([]*Role, *Response, error) {
@@ -395,6 +396,7 @@ func (m *GroupResource) ListApplicationTargetsForApplicationAdministratorRoleFor
 		apps[i] = &application[i]
 	}
 	return apps, resp, nil
+
 }
 
 func (m *GroupResource) RemoveApplicationTargetFromApplicationAdministratorRoleGivenToGroup(groupId string, roleId string, appName string) (*Response, error) {

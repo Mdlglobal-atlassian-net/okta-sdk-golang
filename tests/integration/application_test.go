@@ -485,65 +485,6 @@ func Test_can_create_csr_for_application(t *testing.T) {
 	require.NoError(t, err, "Deleting an application should not error")
 }
 
-// func Test_can_publish_csr(t *testing.T) {
-// 	client, _ := tests.NewClient()
-
-// 	application := create_application(t)
-
-// 	subject := okta.CSRMetadataSubject{
-// 		CountryName:            "US",
-// 		StateOrProvinceName:    "California",
-// 		LocalityName:           "San Francisco",
-// 		OrganizationName:       "Okta, Inc",
-// 		OrganizationalUnitName: "Dev",
-// 		CommonName:             "SP Issuer",
-// 	}
-
-// 	subjectAltNames := okta.CSRMetadataSubjectAltNames{
-// 		DnsNames: []string{"dev.okta.com"},
-// 	}
-
-// 	csr := okta.CSRMetadata{
-// 		Subject:         &subject,
-// 		SubjectAltNames: &subjectAltNames,
-// 	}
-
-// 	createdCSR, _, err := client.Application.GenerateCsrForApplication(application.Id, csr)
-// 	require.NoError(t, err, "Creating an application CSR should not error")
-// 	myCSRBlock := &pem.Block{
-// 		Type:  "CERTIFICATE REQUEST",
-// 		Bytes: []byte(createdCSR.Csr),
-// 	}
-
-// 	certPrivKey, err := rsa.GenerateKey(rand.Reader, 4096)
-// 	require.NoError(t, err, "could not generate private key")
-
-// 	myCSRCert, err := x509.ParseCertificate(myCSRBlock.Bytes)
-// 	ca, err := x509.ParseCertificate([]byte(myCApem))
-// 	certBytes, err := x509.CreateCertificate(rand.Reader, myCSRCert, ca, &certPrivKey.PublicKey, certPrivKey)
-
-// 	fmt.Printf("%+v\n", certBytes)
-
-// 	client.Application.DeactivateApplication(application.Id)
-// 	_, err = client.Application.DeleteApplication(application.Id)
-
-// 	require.NoError(t, err, "Deleting an application should not error")
-// }
-
-func Test_can_list_csrs_for_application(t *testing.T) {
-	client, _ := tests.NewClient()
-
-	application := create_application(t)
-	csrs, _, err := client.Application.ListCsrsForApplication(application.Id)
-
-	fmt.Printf("%+v\n", csrs)
-
-	client.Application.DeactivateApplication(application.Id)
-	_, err = client.Application.DeleteApplication(application.Id)
-
-	require.NoError(t, err, "Deleting an application should not error")
-}
-
 func create_application(t *testing.T) *okta.BasicAuthApplication {
 	client, _ := tests.NewClient()
 	basicApplicationSettingsApplication := okta.NewBasicApplicationSettingsApplication()
@@ -562,21 +503,7 @@ func create_application(t *testing.T) *okta.BasicAuthApplication {
 	return application.(*okta.BasicAuthApplication)
 }
 
-func Test_can_preview_saml_metadata_for_application(t *testing.T) {
-	client, _ := tests.NewClient()
-
-	application := create_application(t)
-	metadata, _, err := client.Application.PreviewSamlMetadataForApplication(application.Id, nil)
-
-	fmt.Printf("%+v\n", metadata)
-
-	client.Application.DeactivateApplication(application.Id)
-	_, err = client.Application.DeleteApplication(application.Id)
-
-	require.NoError(t, err, "Deleting an application should not error")
-}
-
-func Test_delete_all_apps(t *testing.T) {
+func delete_all_apps(t *testing.T) {
 	client, _ := tests.NewClient()
 
 	applicationList, _, err := client.Application.ListApplications(nil)

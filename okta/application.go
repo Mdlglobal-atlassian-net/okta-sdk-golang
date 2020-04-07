@@ -139,6 +139,7 @@ func (m *ApplicationResource) ListApplications(qp *query.Params) ([]App, *Respon
 		apps[i] = &application[i]
 	}
 	return apps, resp, nil
+
 }
 
 // Adds a new application to your Okta organization.
@@ -580,7 +581,7 @@ func (m *ApplicationResource) DeactivateApplication(appId string) (*Response, er
 }
 
 // Previews SAML metadata based on a specific key credential for an application
-func (m *ApplicationResource) PreviewSamlMetadataForApplication(appId string, qp *query.Params) (string, *Response, error) {
+func (m *ApplicationResource) PreviewSamlMetadataForApplication(appId string, qp *query.Params) (*Response, error) {
 	url := fmt.Sprintf("/api/v1/apps/%v/sso/saml/metadata", appId)
 	if qp != nil {
 		url = url + qp.String()
@@ -588,15 +589,15 @@ func (m *ApplicationResource) PreviewSamlMetadataForApplication(appId string, qp
 
 	req, err := m.client.requestExecutor.WithAccept("application/xml").WithContentType("application/json").NewRequest("GET", url, nil)
 	if err != nil {
-		return "", nil, err
+		return nil, err
 	}
 
 	resp, err := m.client.requestExecutor.Do(req, nil)
 	if err != nil {
-		return "", resp, err
+		return resp, err
 	}
 
-	return "", resp, nil
+	return resp, nil
 }
 
 // Revokes all tokens for the specified application

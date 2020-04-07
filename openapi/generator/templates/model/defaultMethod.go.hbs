@@ -21,8 +21,6 @@ func (m *{{modelName}}Resource) {{ucFirst operation.operationId}}({{operationArg
 	if err != nil {
 		{{#if (ne operation.responseModel undefined)}}
 		return nil, nil, err
-		{{else if (ne operation.returnType undefined)}}
-		return "", nil, err
 		{{else}}
 		return nil, err
 		{{/if}}
@@ -51,8 +49,6 @@ func (m *{{modelName}}Resource) {{ucFirst operation.operationId}}({{operationArg
 	{{else}}
 	{{lowercaseFirstLetter operation.responseModel}} := body
 	{{/if}}
-	{{else if (ne operation.returnType undefined)}}
-	var methodReturn {{operation.returnType}}
 	{{else}}
 	var {{lowercaseFirstLetter operation.responseModel}} *{{operation.responseModel}}
 	{{/if}}
@@ -62,17 +58,23 @@ func (m *{{modelName}}Resource) {{ucFirst operation.operationId}}({{operationArg
 	if err != nil {
 		{{#if (ne operation.responseModel undefined)}}
 		return nil, resp, err
-		{{else if (ne operation.returnType undefined)}}
-		return "", resp, err
 		{{/if}}
 	}
 
 	{{#if (applicationModelInterface operation.operationId) }}
-	apps := make([]App, len(application))
+	apps := make([]App, len({{lowercaseFirstLetter operation.responseModel}}))
 	for i := range {{lowercaseFirstLetter operation.responseModel}} {
 		apps[i] = &{{lowercaseFirstLetter operation.responseModel}}[i]
 	}
 	return apps, resp, nil
+
+	{{else if (factorModelInterface operation.operationId) }}
+	factors := make([]Factor, len({{lowercaseFirstLetter operation.responseModel}}))
+	for i := range {{lowercaseFirstLetter operation.responseModel}} {
+		factors[i] = &{{lowercaseFirstLetter operation.responseModel}}[i]
+	}
+	return factors, resp, nil
+
 	{{else}}
 
 	return {{lowercaseFirstLetter operation.responseModel}}, resp, nil
@@ -81,19 +83,13 @@ func (m *{{modelName}}Resource) {{ucFirst operation.operationId}}({{operationArg
 
 	resp, err := m.client.requestExecutor.Do(req, nil)
 	if err != nil {
-		{{#if (ne operation.returnType undefined)}}
-		return "", resp, err
-		{{else if (ne operation.responseModel undefined)}}
+		{{#if (ne operation.responseModel undefined)}}
 		return nil, resp, err
 		{{else if (eq operation.responseModel undefined)}}
 		return resp, err
 		{{/if}}
 	}
 
-	{{#if (ne operation.returnType undefined)}}
-	return "", resp, nil
-	{{else}}
 	return resp, nil
-	{{/if}}
 	{{/if}}
 }

@@ -878,6 +878,7 @@ func (m *UserResource) ListApplicationTargetsForApplicationAdministratorRoleForU
 		apps[i] = &application[i]
 	}
 	return apps, resp, nil
+
 }
 
 func (m *UserResource) AddAllAppsAsTargetToRole(userId string, roleId string) (*Response, error) {

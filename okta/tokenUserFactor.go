@@ -23,24 +23,16 @@ import (
 )
 
 type TokenUserFactor struct {
-	Embedded                  interface{}             `json:"_embedded,omitempty"`
-	Links                     interface{}             `json:"_links,omitempty"`
-	Created                   *time.Time              `json:"created,omitempty"`
-	Device                    string                  `json:"device,omitempty"`
-	DeviceType                string                  `json:"deviceType,omitempty"`
-	FactorProfileId           string                  `json:"factorProfileId,omitempty"`
-	FactorType                string                  `json:"factorType,omitempty"`
-	Id                        string                  `json:"id,omitempty"`
-	LastUpdated               *time.Time              `json:"lastUpdated,omitempty"`
-	MfaStateTokenId           string                  `json:"mfaStateTokenId,omitempty"`
-	Profile                   *TokenUserFactorProfile `json:"profile,omitempty"`
-	Provider                  string                  `json:"provider,omitempty"`
-	RechallengeExistingFactor *bool                   `json:"rechallengeExistingFactor,omitempty"`
-	SessionId                 string                  `json:"sessionId,omitempty"`
-	Status                    string                  `json:"status,omitempty"`
-	TokenLifetimeSeconds      int64                   `json:"tokenLifetimeSeconds,omitempty"`
-	UserId                    string                  `json:"userId,omitempty"`
-	Verify                    *VerifyFactorRequest    `json:"verify,omitempty"`
+	Embedded    interface{}             `json:"_embedded,omitempty"`
+	Links       interface{}             `json:"_links,omitempty"`
+	Created     *time.Time              `json:"created,omitempty"`
+	FactorType  string                  `json:"factorType,omitempty"`
+	Id          string                  `json:"id,omitempty"`
+	LastUpdated *time.Time              `json:"lastUpdated,omitempty"`
+	Profile     *TokenUserFactorProfile `json:"profile,omitempty"`
+	Provider    string                  `json:"provider,omitempty"`
+	Status      string                  `json:"status,omitempty"`
+	Verify      *VerifyFactorRequest    `json:"verify,omitempty"`
 }
 
 func NewTokenUserFactor() *TokenUserFactor {

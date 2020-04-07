@@ -30,7 +30,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-const Version = "0.1.0"
+const Version = "1.0.0-rc.1"
 
 type Client struct {
 	config *config
@@ -54,7 +54,7 @@ type Client struct {
 	SmsTemplate         *SmsTemplateResource
 	TrustedOrigin       *TrustedOriginResource
 	User                *UserResource
-	Factor              *FactorResource
+	UserFactor          *UserFactorResource
 }
 
 type resource struct {
@@ -113,7 +113,7 @@ func NewClient(ctx context.Context, conf ...ConfigSetter) (*Client, error) {
 	c.SmsTemplate = (*SmsTemplateResource)(&c.resource)
 	c.TrustedOrigin = (*TrustedOriginResource)(&c.resource)
 	c.User = (*UserResource)(&c.resource)
-	c.Factor = (*FactorResource)(&c.resource)
+	c.UserFactor = (*UserFactorResource)(&c.resource)
 	return c, nil
 }
 

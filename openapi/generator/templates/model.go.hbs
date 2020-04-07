@@ -14,8 +14,9 @@ type App interface {
 
 {{/if}}
 
-{{#if (eq model.modelName "Factor")}}
-type UserFactor interface {
+{{#if (eq model.modelName "UserFactor")}}
+{{log model.modelName }}
+type Factor interface {
 	IsUserFactorInstance() bool
 }
 

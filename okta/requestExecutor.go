@@ -128,7 +128,6 @@ func (re *RequestExecutor) NewRequest(method string, url string, body interface{
 			if err != nil {
 				return nil, err
 			}
-			fmt.Printf("%+v\n", signer)
 
 			claims := ClientAssertionClaims{
 				Subject:  re.config.Okta.Client.ClientId,
@@ -142,7 +141,6 @@ func (re *RequestExecutor) NewRequest(method string, url string, body interface{
 			if err != nil {
 				return nil, err
 			}
-			fmt.Printf("%+v\n", clientAssertion)
 
 			var tokenRequestBuff io.ReadWriter
 			query := nUrl.Values{}
@@ -157,7 +155,6 @@ func (re *RequestExecutor) NewRequest(method string, url string, body interface{
 			if err != nil {
 				return nil, err
 			}
-			fmt.Printf("%+v\n", tokenRequestUrl)
 
 			tokenRequest.Header.Add("Accept", "application/json")
 			tokenRequest.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -174,8 +171,8 @@ func (re *RequestExecutor) NewRequest(method string, url string, body interface{
 			origResp := ioutil.NopCloser(bytes.NewBuffer(respBody))
 			tokenResponse.Body = origResp
 			var accessToken *RequestAccessToken
-			resp, err := buildResponse(tokenResponse, &accessToken)
-			fmt.Printf("%+v\n", resp)
+
+			_, err = buildResponse(tokenResponse, &accessToken)
 			if err != nil {
 				return nil, err
 			}
@@ -237,7 +234,7 @@ func (re *RequestExecutor) Do(req *http.Request, v interface{}) (*Response, erro
 		}
 		origResp := ioutil.NopCloser(bytes.NewBuffer(respBody))
 		resp.Body = origResp
-		if resp.StatusCode >= 200 && resp.StatusCode <= 299 && req.Method == http.MethodGet && reflect.TypeOf(v).Kind() != reflect.Slice {
+		if resp.StatusCode >= 200 && resp.StatusCode <= 299 && req.Method == http.MethodGet && v != nil && reflect.TypeOf(v).Kind() != reflect.Slice {
 			re.cache.Set(cacheKey, resp)
 		}
 		return buildResponse(resp, &v)

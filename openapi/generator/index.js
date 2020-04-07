@@ -196,8 +196,8 @@ function operationArgumentBuilder(operation) {
       bodyModel = "App";
     }
 
-    if(bodyModel === "Factor") {
-      bodyModel = "UserFactor";
+    if(bodyModel === "UserFactor") {
+      bodyModel = "Factor";
     }
 
     if(bodyModel === "String") {
@@ -214,7 +214,7 @@ function operationArgumentBuilder(operation) {
   if(operation.operationId === "getFactor" ||
       operation.operationId === "activateFactor" ||
       operation.operationId === "verifyFactor") {
-    args.push(`factorInstance UserFactor`);
+    args.push(`factorInstance Factor`);
   }
 
   if (operation.queryParams.length) {
@@ -251,9 +251,9 @@ function returnType(operation) {
         responseModel = "interface{}"
       }
     }
-    if ( responseModel === "*Factor" ) {
+    if ( responseModel === "*UserFactor" ) {
       if ( factorModelInterface ) {
-        responseModel = "UserFactor"
+        responseModel = "Factor"
       } else {
         responseModel = "interface{}"
       }
@@ -263,9 +263,7 @@ function returnType(operation) {
     }
     return " (" + responseModel + ", *Response, error) ";
   }
-  if (operation.returnType) {
-    return " (" + operation.returnType + ", *Response, error) ";
-  }
+
   return " (*Response, error) ";
 }
 
@@ -320,7 +318,7 @@ function getClientTagResources(operations) {
     if (tag === "AuthServer") tag = "AuthorizationServer";
     if (tag === "Template") tag = "SmsTemplate";
     if (tag === "Idp") tag = "IdpTrust";
-    if (tag === "UserFactor") tag = "Factor";
+    if (tag === "UserFactor") tag = "UserFactor";
     if (tag === "Log") tag = "LogEvent";
     tagResources.push(structProp(tag) + " *" + structProp(tag) + "Resource")
   }
@@ -334,7 +332,7 @@ function getNewClientTagProps(operations) {
     if (tag === "AuthServer") tag = "AuthorizationServer";
     if (tag === "Template") tag = "SmsTemplate";
     if (tag === "Idp") tag = "IdpTrust";
-    if (tag === "UserFactor") tag = "Factor";
+    if (tag === "UserFactor") tag = "UserFactor";
     if (tag === "Log") tag = "LogEvent";
     tagResources.push("c." + structProp(tag) + " = (*" + structProp(tag) + "Resource)(&c.resource)")
   }
@@ -453,7 +451,7 @@ golang.process = ({ spec, operations, models, handlebars }) => {
       if (tag === "AuthServer") tag = "AuthorizationServer";
       if (tag === "Template") tag = "SmsTemplate";
       if (tag === "Idp") tag = "IdpTrust";
-      if (tag === "UserFactor" ) tag = "Factor";
+      if (tag === "UserFactor" ) tag = "UserFactor";
       if (tag === "Log" ) tag = "LogEvent";
       if (tag == model.modelName) {
         modelOperations[operation.operationId] = operation;

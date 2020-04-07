@@ -24,43 +24,35 @@ import (
 	"time"
 )
 
-type UserFactor interface {
+type Factor interface {
 	IsUserFactorInstance() bool
 }
 
-type FactorResource resource
+type UserFactorResource resource
 
-type Factor struct {
-	Embedded                  interface{}          `json:"_embedded,omitempty"`
-	Links                     interface{}          `json:"_links,omitempty"`
-	Created                   *time.Time           `json:"created,omitempty"`
-	Device                    string               `json:"device,omitempty"`
-	DeviceType                string               `json:"deviceType,omitempty"`
-	FactorProfileId           string               `json:"factorProfileId,omitempty"`
-	FactorType                string               `json:"factorType,omitempty"`
-	Id                        string               `json:"id,omitempty"`
-	LastUpdated               *time.Time           `json:"lastUpdated,omitempty"`
-	MfaStateTokenId           string               `json:"mfaStateTokenId,omitempty"`
-	Profile                   *UserFactorProfile   `json:"profile,omitempty"`
-	Provider                  string               `json:"provider,omitempty"`
-	RechallengeExistingFactor *bool                `json:"rechallengeExistingFactor,omitempty"`
-	SessionId                 string               `json:"sessionId,omitempty"`
-	Status                    string               `json:"status,omitempty"`
-	TokenLifetimeSeconds      int64                `json:"tokenLifetimeSeconds,omitempty"`
-	UserId                    string               `json:"userId,omitempty"`
-	Verify                    *VerifyFactorRequest `json:"verify,omitempty"`
+type UserFactor struct {
+	Embedded    interface{}          `json:"_embedded,omitempty"`
+	Links       interface{}          `json:"_links,omitempty"`
+	Created     *time.Time           `json:"created,omitempty"`
+	FactorType  string               `json:"factorType,omitempty"`
+	Id          string               `json:"id,omitempty"`
+	LastUpdated *time.Time           `json:"lastUpdated,omitempty"`
+	Profile     *UserFactorProfile   `json:"profile,omitempty"`
+	Provider    string               `json:"provider,omitempty"`
+	Status      string               `json:"status,omitempty"`
+	Verify      *VerifyFactorRequest `json:"verify,omitempty"`
 }
 
-func NewFactor() *Factor {
-	return &Factor{}
+func NewUserFactor() *UserFactor {
+	return &UserFactor{}
 }
 
-func (a *Factor) IsUserFactorInstance() bool {
+func (a *UserFactor) IsUserFactorInstance() bool {
 	return true
 }
 
 // Unenrolls an existing factor for the specified user, allowing the user to enroll a new factor.
-func (m *FactorResource) DeleteFactor(userId string, factorId string) (*Response, error) {
+func (m *UserFactorResource) DeleteFactor(userId string, factorId string) (*Response, error) {
 	url := fmt.Sprintf("/api/v1/users/%v/factors/%v", userId, factorId)
 
 	req, err := m.client.requestExecutor.WithAccept("application/json").WithContentType("application/json").NewRequest("DELETE", url, nil)
@@ -77,7 +69,7 @@ func (m *FactorResource) DeleteFactor(userId string, factorId string) (*Response
 }
 
 // Enumerates all the enrolled factors for the specified user
-func (m *FactorResource) ListFactors(userId string) ([]UserFactor, *Response, error) {
+func (m *UserFactorResource) ListFactors(userId string) ([]Factor, *Response, error) {
 	url := fmt.Sprintf("/api/v1/users/%v/factors", userId)
 
 	req, err := m.client.requestExecutor.WithAccept("application/json").WithContentType("application/json").NewRequest("GET", url, nil)
@@ -85,18 +77,23 @@ func (m *FactorResource) ListFactors(userId string) ([]UserFactor, *Response, er
 		return nil, nil, err
 	}
 
-	var factor []UserFactor
+	var userFactor []UserFactor
 
-	resp, err := m.client.requestExecutor.Do(req, &factor)
+	resp, err := m.client.requestExecutor.Do(req, &userFactor)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return factor, resp, nil
+	factors := make([]Factor, len(userFactor))
+	for i := range userFactor {
+		factors[i] = &userFactor[i]
+	}
+	return factors, resp, nil
+
 }
 
 // Enrolls a user with a supported factor.
-func (m *FactorResource) EnrollFactor(userId string, body UserFactor, qp *query.Params) (UserFactor, *Response, error) {
+func (m *UserFactorResource) EnrollFactor(userId string, body Factor, qp *query.Params) (Factor, *Response, error) {
 	url := fmt.Sprintf("/api/v1/users/%v/factors", userId)
 	if qp != nil {
 		url = url + qp.String()
@@ -107,18 +104,18 @@ func (m *FactorResource) EnrollFactor(userId string, body UserFactor, qp *query.
 		return nil, nil, err
 	}
 
-	factor := body
+	var userFactor *UserFactor
 
-	resp, err := m.client.requestExecutor.Do(req, &factor)
+	resp, err := m.client.requestExecutor.Do(req, &userFactor)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return factor, resp, nil
+	return userFactor, resp, nil
 }
 
 // Enumerates all the supported factors that can be enrolled for the specified user
-func (m *FactorResource) ListSupportedFactors(userId string) ([]UserFactor, *Response, error) {
+func (m *UserFactorResource) ListSupportedFactors(userId string) ([]Factor, *Response, error) {
 	url := fmt.Sprintf("/api/v1/users/%v/factors/catalog", userId)
 
 	req, err := m.client.requestExecutor.WithAccept("application/json").WithContentType("application/json").NewRequest("GET", url, nil)
@@ -126,18 +123,23 @@ func (m *FactorResource) ListSupportedFactors(userId string) ([]UserFactor, *Res
 		return nil, nil, err
 	}
 
-	var factor []UserFactor
+	var userFactor []UserFactor
 
-	resp, err := m.client.requestExecutor.Do(req, &factor)
+	resp, err := m.client.requestExecutor.Do(req, &userFactor)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return factor, resp, nil
+	factors := make([]Factor, len(userFactor))
+	for i := range userFactor {
+		factors[i] = &userFactor[i]
+	}
+	return factors, resp, nil
+
 }
 
 // Enumerates all available security questions for a user&#x27;s &#x60;question&#x60; factor
-func (m *FactorResource) ListSupportedSecurityQuestions(userId string) ([]*SecurityQuestion, *Response, error) {
+func (m *UserFactorResource) ListSupportedSecurityQuestions(userId string) ([]*SecurityQuestion, *Response, error) {
 	url := fmt.Sprintf("/api/v1/users/%v/factors/questions", userId)
 
 	req, err := m.client.requestExecutor.WithAccept("application/json").WithContentType("application/json").NewRequest("GET", url, nil)
@@ -156,7 +158,7 @@ func (m *FactorResource) ListSupportedSecurityQuestions(userId string) ([]*Secur
 }
 
 // Fetches a factor for the specified user
-func (m *FactorResource) GetFactor(userId string, factorId string, factorInstance UserFactor) (UserFactor, *Response, error) {
+func (m *UserFactorResource) GetFactor(userId string, factorId string, factorInstance Factor) (Factor, *Response, error) {
 	url := fmt.Sprintf("/api/v1/users/%v/factors/%v", userId, factorId)
 
 	req, err := m.client.requestExecutor.WithAccept("application/json").WithContentType("application/json").NewRequest("GET", url, nil)
@@ -164,18 +166,18 @@ func (m *FactorResource) GetFactor(userId string, factorId string, factorInstanc
 		return nil, nil, err
 	}
 
-	factor := factorInstance
+	var userFactor *UserFactor
 
-	resp, err := m.client.requestExecutor.Do(req, &factor)
+	resp, err := m.client.requestExecutor.Do(req, &userFactor)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return factor, resp, nil
+	return userFactor, resp, nil
 }
 
 // The &#x60;sms&#x60; and &#x60;token:software:totp&#x60; factor types require activation to complete the enrollment process.
-func (m *FactorResource) ActivateFactor(userId string, factorId string, body VerifyFactorRequest, factorInstance UserFactor) (UserFactor, *Response, error) {
+func (m *UserFactorResource) ActivateFactor(userId string, factorId string, body VerifyFactorRequest, factorInstance Factor) (Factor, *Response, error) {
 	url := fmt.Sprintf("/api/v1/users/%v/factors/%v/lifecycle/activate", userId, factorId)
 
 	req, err := m.client.requestExecutor.WithAccept("application/json").WithContentType("application/json").NewRequest("POST", url, body)
@@ -183,18 +185,18 @@ func (m *FactorResource) ActivateFactor(userId string, factorId string, body Ver
 		return nil, nil, err
 	}
 
-	factor := factorInstance
+	var userFactor *UserFactor
 
-	resp, err := m.client.requestExecutor.Do(req, &factor)
+	resp, err := m.client.requestExecutor.Do(req, &userFactor)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return factor, resp, nil
+	return userFactor, resp, nil
 }
 
 // Polls factors verification transaction for status.
-func (m *FactorResource) GetFactorTransactionStatus(userId string, factorId string, transactionId string) (*VerifyUserFactorResponse, *Response, error) {
+func (m *UserFactorResource) GetFactorTransactionStatus(userId string, factorId string, transactionId string) (*VerifyUserFactorResponse, *Response, error) {
 	url := fmt.Sprintf("/api/v1/users/%v/factors/%v/transactions/%v", userId, factorId, transactionId)
 
 	req, err := m.client.requestExecutor.WithAccept("application/json").WithContentType("application/json").NewRequest("GET", url, nil)
@@ -213,7 +215,7 @@ func (m *FactorResource) GetFactorTransactionStatus(userId string, factorId stri
 }
 
 // Verifies an OTP for a &#x60;token&#x60; or &#x60;token:hardware&#x60; factor
-func (m *FactorResource) VerifyFactor(userId string, factorId string, body VerifyFactorRequest, factorInstance UserFactor, qp *query.Params) (*VerifyUserFactorResponse, *Response, error) {
+func (m *UserFactorResource) VerifyFactor(userId string, factorId string, body VerifyFactorRequest, factorInstance Factor, qp *query.Params) (*VerifyUserFactorResponse, *Response, error) {
 	url := fmt.Sprintf("/api/v1/users/%v/factors/%v/verify", userId, factorId)
 	if qp != nil {
 		url = url + qp.String()
